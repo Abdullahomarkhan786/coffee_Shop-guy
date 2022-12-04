@@ -1,0 +1,244 @@
+package abdullah.com.gui;
+import java.awt.*;
+import java.text.*;
+import java.awt.event.*;
+import javax.swing.*;
+
+public class coffee_Shop extends JFrame implements ActionListener
+{   JFrame frame = new JFrame();
+    JLabel TitleDisplay = new JLabel ("Welcome to coffee shop");
+    JLabel NameOfCustomer = new JLabel (" Hey! May I know your name :");
+    JLabel ItemQuantity = new JLabel ("Enter the quantity you want purchase :");
+    JPanel displayscreen = new JPanel();
+    JTextField NameArea = new JTextField(15); //creates a text field of name
+    JTextField quantityArea = new JTextField(17); // creates a text field of quantity 
+    
+    //all radio buttons called JRadioButtons
+    JRadioButton cappucinoButton = new JRadioButton("cappucino");
+    JRadioButton latteButton = new JRadioButton("Latte");
+    JRadioButton americanoButton = new JRadioButton("americano");
+    JRadioButton mochaButton = new JRadioButton("Mocha");
+    JRadioButton expressoButton = new JRadioButton("expresso");
+    JRadioButton invisibleButton = new JRadioButton();
+    
+    
+    ButtonGroup BUTTONS = new ButtonGroup();
+    
+    
+    // output text area to contain customer name, quantity, coffee type, and total.
+    JTextArea outputTextArea = new JTextArea(6, 25);
+    
+    //create scroll bars in text area above if need be.
+    JScrollPane scrollPane = new JScrollPane(outputTextArea);
+    
+    //add to order button calculates cost of coffee and quantity
+    JButton addToOrderButton = new JButton("Add To Order");
+    
+    //completes order and places final order cost in grandTotalOutputLabel 
+    JButton completeOrderButton = new JButton("Complete Order");
+    
+    //clears all fields, text area and buttons
+    JButton PlaceNewOrder = new JButton ("Place New Order");
+    
+    //JLabel for grand total
+    JLabel grandTotalLabel = new JLabel ("Total Order Cost : ");
+    
+    //displays actual accumulated grand total
+    JLabel grandTotalOutputLabel = new JLabel ();
+    
+    //formats price and totals in currency decimal format
+    DecimalFormat currencytype = new DecimalFormat("Aed #00.00");
+    
+    //The font applied to the company label
+    Font bigfont = new Font ("AERIAL ROUND", Font.BOLD, 30);
+    
+//instance variables
+    int quantityPurchased;
+    float TotalAfterTax;
+    String customerName;
+    String coffeeType;
+    float coffeePrice;
+    float accumulatedCost;
+        
+//these are the final prices applied to following coffees; 
+
+    final float cappucino_price = 17.00f;
+    final float mocha_price = 28.00f;
+    final float expresso_price = 23.75f;
+    final float latte_price = 25.50f;
+    final float americano_price = 19.95f;
+    final float TAX = 0.05f; // this is the 5% vat on coffees
+     
+     //instance variables
+      
+     float subTotal; 
+     
+        public static void main(String[] args)
+    {
+        coffee_Shop coffee_object = new coffee_Shop(); //Creating an object of class coffee_shop
+        coffee_object.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //setting the property of Jframe
+            
+    }
+
+//constructor
+    public coffee_Shop()
+    {
+        
+        designClass();
+        addListeners();
+        setContentPane(displayscreen);
+        //setting the dimensions and visibility of JFrame
+        setSize(500, 350);
+        setVisible(true);
+        setResizable(false); //frame cannot be resized after this
+        
+   }
+
+    //CREATE THE ADDLISTENERS METHOD
+    public void addListeners()
+    {
+        addToOrderButton.addActionListener(this);
+        addToOrderButton.setFont(new Font("comic sans" , Font.BOLD , 12));
+        addToOrderButton.setForeground(Color.black);
+        addToOrderButton.setFocusable(false);
+        quantityArea.addActionListener(this);
+        invisibleButton.setSelected(true);
+        completeOrderButton.addActionListener(this);
+        completeOrderButton.setFont(new Font("comic sans" , Font.BOLD , 12));
+        completeOrderButton.setForeground(Color.black);
+        completeOrderButton.setFocusable(false);
+        PlaceNewOrder.addActionListener(this);
+        PlaceNewOrder.setFont(new Font("comic sans" , Font.BOLD , 12));
+        PlaceNewOrder.setForeground(Color.red);
+        PlaceNewOrder.setFocusable(false);
+            }   
+    
+    //creating a method in which all the buttons are added to the display screen / frame
+    public void designClass()
+    {
+                TitleDisplay.setFont(bigfont); //setting the font for the title
+                
+                //adding all the buttons to gui
+                BUTTONS.add(invisibleButton);
+                BUTTONS.add(mochaButton);
+                BUTTONS.add(latteButton);
+                BUTTONS.add(expressoButton);
+                BUTTONS.add(cappucinoButton);
+                BUTTONS.add(americanoButton);
+                
+
+                //adding the labels 
+                displayscreen.add(TitleDisplay);
+                displayscreen.add(NameOfCustomer);
+                
+                displayscreen.add(NameArea); //adding Nametextfield to gui
+
+                displayscreen.add(ItemQuantity); //adding quantity purchased label to GUI
+                
+                displayscreen.add(quantityArea); //adding quantity purchased TextField to gui
+                
+                //add JRadioButtons to displayscreen
+                displayscreen.add(mochaButton);
+                displayscreen.add(latteButton);
+                displayscreen.add(expressoButton);
+                displayscreen.add(cappucinoButton);
+                displayscreen.add(americanoButton);
+                
+                displayscreen.add(scrollPane); //adding scroll pane to GUI
+                
+                displayscreen.add(addToOrderButton); //adding the add to order button to GUI
+                
+                displayscreen.add(completeOrderButton); //adding complete order button to GUI
+                
+                displayscreen.add(PlaceNewOrder); //adding placeNewOrder button to GUI
+                
+                //JLabels added to GUI
+                displayscreen.add(grandTotalLabel);
+                displayscreen.add(grandTotalOutputLabel);
+    }
+    
+//action performed and 
+
+        public void actionPerformed(ActionEvent e) 
+        {
+            Object sourceObject = e.getSource();
+            
+                if(sourceObject == addToOrderButton )
+                {   
+                    addToOrder();
+                }
+                
+                else if (sourceObject == completeOrderButton)
+                {
+                 
+                    //calculates tax based on tax rate of 0.05% of total coffee purchase added to the subtotal for the grand total owed by the customer
+                    //displayed in a label below the text area next to Total Order Cost
+                    calculateTotal(); 
+                }
+                else if(sourceObject == PlaceNewOrder)
+                {
+                //calling the method clear
+                    clearAll();
+                }
+}
+                public void addToOrder()
+            {
+                float CostOfItem;
+// below describes what happens when the following buttons are pressed              
+                    if(mochaButton.isSelected()==true){
+                        coffeeType = "Mocha";
+                        coffeePrice = mocha_price;
+                    }
+                    else if(latteButton.isSelected()==true){
+                        coffeeType = "Latte";
+                        coffeePrice = latte_price;
+                    }
+                    else if(expressoButton.isSelected()==true){
+                        coffeeType = "expresso";
+                        coffeePrice = expresso_price;
+                    }
+                    else if(cappucinoButton.isSelected()==true){
+                        coffeeType = "cappucino";
+                        coffeePrice = cappucino_price;
+                    }
+                    else {
+                        coffeeType = "americano";
+                        coffeePrice = americano_price;
+                    }
+                    customerName = NameArea.getText();
+                        //this basically returns integer value in decimal format
+                        quantityPurchased = Integer.parseInt(quantityArea.getText());
+                        
+                        CostOfItem = quantityPurchased* coffeePrice; //how cost of an item is calculated
+
+                        subTotal += CostOfItem; // how subtotal is calculated
+                        
+                        outputTextArea.append("Name : " + customerName + "   "
+                                            + "Quantity : " + quantityPurchased + "\n"
+                                            + "Coffee Type: " + coffeeType + "   "
+                                            + "Total : " + currencytype.format(CostOfItem)+"\n");
+                        
+                        // clears the selection in such a way that none buttons are selected
+                        BUTTONS.clearSelection();
+                        // quantityArea text field gets cleared too
+                        quantityArea.setText("");
+                        }                       
+//clears all text fields and buttons and gets back to customer name text field
+            public void clearAll()
+                {NameArea.setText("");
+                NameArea.requestFocus();
+                quantityArea.setText("");
+                outputTextArea.setText("");
+                BUTTONS.clearSelection();
+                    grandTotalOutputLabel.setText("");
+                }
+        //calculates all and places into label TotatAfterTax
+            public void calculateTotal()
+            {
+                float accumulatedCost = 0;
+                TotalAfterTax = subTotal * TAX;
+                accumulatedCost = subTotal + TotalAfterTax;
+                grandTotalOutputLabel.setText("" + currencytype.format(accumulatedCost));   
+            }
+}
+
